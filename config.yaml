@@ -1,0 +1,27 @@
+# /home/$USER/.dotfiles/config.yaml
+# The config file for deploy.sh
+# defines where which dotfile goes
+
+# Mapping format:
+# source: relative path inside .dotfiles
+# target: absolute path where the file/directory should be copied
+
+mappings:
+  bash/.bashrc:
+    target: "$HOME/.bashrc"
+
+  bash/.bash_profile:
+    target: "$HOME/.bash_profile"
+
+  alacritty/:
+    target: "$XDG_CONFIG_HOME/alacritty/"
+
+  sway/:
+    target: "$XDG_CONFIG_HOME/sway/"
+
+  vim/:
+    target: "$XDG_CONFIG_HOME/nvim/"
+
+  git/:
+    target: "$XDG_CONFIG_HOME/git/"
+

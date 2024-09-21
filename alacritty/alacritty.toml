@@ -1,0 +1,5 @@
+[font]
+normal	= { family = "FiraCode Nerd Font", style = "normal" }
+bold	= { family = "FiraCode Nerd Font", style = "bold" }
+italic	= { family = "FiraCode Nerd Font", style = "italic" }
+size 	= 12
