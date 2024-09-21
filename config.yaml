@@ -1,4 +1,4 @@
-# /home/$USER/.dotfiles/config.yaml
+# /home/$USER/dotfiles/config.yaml
 # The config file for deploy.sh
 # defines where which dotfile goes
 
@@ -19,9 +19,11 @@ mappings:
   sway/:
     target: "$XDG_CONFIG_HOME/sway/"
 
-  vim/:
+  nvim/:
     target: "$XDG_CONFIG_HOME/nvim/"
 
   git/:
     target: "$XDG_CONFIG_HOME/git/"
 
+  ranger/:
+    target: "$XDG_CONFIG_HOME/ranger/"

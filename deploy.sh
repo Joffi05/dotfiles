@@ -4,7 +4,7 @@
 set -e
 
 # Define the path to the configuration file
-CONFIG_FILE="$HOME/.dotfiles/config.yaml"
+CONFIG_FILE="$HOME/dotfiles/config.yaml"
 
 # Function to display usage information
 usage() {
@@ -13,6 +13,7 @@ usage() {
     echo "Options:"
     echo "  -c, --copy        Perform the copy operations (default behavior)"
     echo "  -l, --link        Create symbolic links instead of copying"
+    echo "  -f, --force       Force overwrite of existing files or links"
     echo "  -b, --backup      Backup existing files before overwriting"
     echo "  -n, --dry-run     Show what would have been done without making changes"
     echo "  -v, --verbose     Enable verbose output"
@@ -22,6 +23,7 @@ usage() {
 
 # Default options
 ACTION="copy"
+FORCE=false
 BACKUP=false
 DRY_RUN=false
 VERBOSE=false
@@ -36,6 +38,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         -l|--link)
             ACTION="link"
+            shift
+            ;;
+        -f|--force)
+            FORCE=true
             shift
             ;;
         -b|--backup)
@@ -67,7 +73,7 @@ log() {
     fi
 }
 
-# Function to perform copy or link
+# Function to perform copy or link with force and backup options
 deploy() {
     local source="$1"
     local target="$2"
@@ -81,42 +87,63 @@ deploy() {
         return
     fi
 
-    # Create target directory if it doesn't exist
-    local target_dir
-    target_dir=$(dirname "$target")
-    if [ ! -d "$target_dir" ]; then
-        if [ "$DRY_RUN" = true ]; then
-            log "Would create directory: $target_dir"
-        else
-            log "Creating directory: $target_dir"
-            mkdir -p "$target_dir"
+    # Determine if source is a directory
+    if [ -d "$source" ]; then
+        # Ensure target directory exists
+        if [ ! -d "$target" ]; then
+            if [ "$DRY_RUN" = true ]; then
+                log "Would create directory: $target"
+            else
+                log "Creating directory: $target"
+                mkdir -p "$target"
+            fi
         fi
-    fi
 
-    # Backup existing target if necessary
-    if [ "$BACKUP" = true ] && [ -e "$target" ]; then
+        # Copy contents of the source directory to the target directory
         if [ "$DRY_RUN" = true ]; then
-            log "Would backup existing file: $target to $target.backup"
+            log "Would copy contents of $source to $target"
         else
-            log "Backing up existing file: $target to $target.backup"
-            cp -a "$target" "$target.backup"
+            log "Copying contents of $source to $target"
+            cp -a "$source/." "$target/"
         fi
-    fi
+    else
+        # Handle files
 
-    # Perform the copy or link
-    if [ "$ACTION" = "copy" ]; then
-        if [ "$DRY_RUN" = true ]; then
-            log "Would copy $source to $target"
-        else
-            log "Copying $source to $target"
-            cp -a "$source" "$target"
+        # If force is enabled and target exists, remove it
+        if [ "$FORCE" = true ] && [ -e "$target" ]; then
+            if [ "$DRY_RUN" = true ]; then
+                log "Would remove existing file/link: $target"
+            else
+                log "Removing existing file/link: $target"
+                rm -rf "$target"
+            fi
         fi
-    elif [ "$ACTION" = "link" ]; then
-        if [ "$DRY_RUN" = true ]; then
-            log "Would create symlink from $target to $source"
-        else
-            log "Creating symlink from $target to $source"
-            ln -sf "$source" "$target"
+
+        # Backup existing target if necessary
+        if [ "$BACKUP" = true ] && [ -e "$target" ]; then
+            if [ "$DRY_RUN" = true ]; then
+                log "Would backup existing file: $target to $target.backup"
+            else
+                log "Backing up existing file: $target to $target.backup"
+                cp -a "$target" "$target.backup"
+            fi
+        fi
+
+        # Perform the copy or link
+        if [ "$ACTION" = "copy" ]; then
+            if [ "$DRY_RUN" = true ]; then
+                log "Would copy $source to $target"
+            else
+                log "Copying $source to $target"
+                cp -a "$source" "$target"
+            fi
+        elif [ "$ACTION" = "link" ]; then
+            if [ "$DRY_RUN" = true ]; then
+                log "Would create symlink from $target to $source"
+            else
+                log "Creating symlink from $target to $source"
+                ln -sf "$source" "$target"
+            fi
         fi
     fi
 }
@@ -128,14 +155,23 @@ if [ ! -f "$CONFIG_FILE" ]; then
 fi
 
 # Read mappings from config.yaml using yq
+if [ "$VERBOSE" = true ]; then
+    echo "Reading configuration from $CONFIG_FILE"
+fi
+
 MAPPINGS=$(yq e '.mappings' "$CONFIG_FILE")
+
+if [ "$VERBOSE" = true ]; then
+    echo "Mappings found:"
+    echo "$MAPPINGS"
+fi
 
 # Iterate over each mapping
 echo "$MAPPINGS" | yq e 'keys | .[]' - | while read -r key; do
     # Extract target path
     target=$(yq e ".mappings.\"$key\".target" "$CONFIG_FILE")
-    # Define source path relative to .dotfiles
-    source="$HOME/.dotfiles/$key"
+    # Define source path relative to dotfiles
+    source="$HOME/dotfiles/$key"
 
     # Deploy the file or directory
     deploy "$source" "$target"
