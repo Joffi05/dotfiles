@@ -228,16 +228,15 @@ font pango:FiraCode Nerd Font 12
 # Read `man 5 sway-bar` for more information about this section.
 bar {
     position top
-
-    # When the status_command prints a new line to stdout, swaybar updates.
-    # The default just shows the current date and time.
-    status_command while date +'%Y-%m-%d %X'; do sleep 1; done
-
+    # Use the custom status_command script
+    status_command ~/.config/sway/swaybar_status.sh
+    #font pango:DejaVu Sans Mono 10
     colors {
+        background #282c34
         statusline #ffffff
-        background #323232
-        inactive_workspace #32323200 #32323200 #5c5c5c
+        separator  #666666
     }
 }
+
 
 include /etc/sway/config.d/*
