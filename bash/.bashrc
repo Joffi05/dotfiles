@@ -4,6 +4,7 @@
 [[ $- != *i* ]] && return
 
 export EDITOR="nvim"
+export VISUAL="nvim"
 
 alias ls='ls --color=auto'
 alias ll="ls -la --color=auto"

@@ -5,6 +5,7 @@ set -e
 
 # Define the path to the configuration file
 CONFIG_FILE="$HOME/dotfiles/config.yaml"
+MANIFEST_FILE="$HOME/dotfiles/.deploy_manifest"
 
 # Function to display usage information
 usage() {
@@ -73,6 +74,17 @@ log() {
     fi
 }
 
+# Initialize manifest file if it doesn't exist
+if [ ! -f "$MANIFEST_FILE" ]; then
+    touch "$MANIFEST_FILE"
+fi
+
+# Read existing manifest into an associative array
+declare -A manifest
+while IFS= read -r line; do
+    manifest["$line"]=1
+done < "$MANIFEST_FILE"
+
 # Function to perform copy or link with force and backup options
 deploy() {
     local source="$1"
@@ -80,6 +92,10 @@ deploy() {
 
     # Expand environment variables in target path
     eval target="$target"
+
+    # Convert source and target to absolute paths
+    source="$(realpath "$source")"
+    target="$(realpath -m "$target")"
 
     # Check if source exists
     if [ ! -e "$source" ]; then
@@ -106,6 +122,14 @@ deploy() {
             log "Copying contents of $source to $target"
             cp -a "$source/." "$target/"
         fi
+
+        # Record deployed files in the manifest
+        while IFS= read -r -d '' file; do
+            # Compute relative path from source
+            rel_path=$(realpath --relative-to="$source" "$file")
+            manifest_entry="$target/$rel_path"
+            manifest["$manifest_entry"]=1
+        done < <(find "$source" -type f -print0)
     else
         # Handle files
 
@@ -145,8 +169,54 @@ deploy() {
                 ln -sf "$source" "$target"
             fi
         fi
+
+        # Record deployed file in the manifest
+        manifest["$target"]=1
     fi
 }
+
+# Function to delete target files that no longer exist in source
+cleanup_obsolete_targets() {
+    echo "Starting cleanup of obsolete target files..."
+
+    # Iterate over manifest entries
+    for target_file in "${!manifest[@]}"; do
+        matched=false
+        for key in "${!mapping_targets[@]}"; do
+            mapping_source="${mapping_sources[$key]}"
+            mapping_target="${mapping_targets[$key]}"
+
+            if [[ "$target_file" == "$mapping_target" || "$target_file" == "$mapping_target/"* ]]; then
+                rel_path="${target_file#$mapping_target/}"
+                source_file="$mapping_source/$rel_path"
+
+                if [ ! -e "$source_file" ]; then
+                    if [ -e "$target_file" ]; then
+                        if [ "$DRY_RUN" = true ]; then
+                            log "Would remove obsolete target file: $target_file"
+                        else
+                            log "Removing obsolete target file: $target_file"
+                            rm -rf "$target_file"
+                        fi
+                    fi
+                    # Remove from manifest
+                    unset "manifest[$target_file]"
+                    log "Removed from manifest: $target_file"
+                fi
+                matched=true
+                break
+            fi
+        done
+
+        if [ "$matched" = false ]; then
+            # If target_file doesn't match any mapping, remove it from manifest
+            unset "manifest[$target_file]"
+        fi
+    done
+
+    echo "Cleanup completed."
+}
+
 
 # Check if configuration file exists
 if [ ! -f "$CONFIG_FILE" ]; then
@@ -159,23 +229,52 @@ if [ "$VERBOSE" = true ]; then
     echo "Reading configuration from $CONFIG_FILE"
 fi
 
-MAPPINGS=$(yq e '.mappings' "$CONFIG_FILE")
+# Read mapping keys into an array to avoid subshells
+readarray -t MAPPINGS_KEYS < <(yq e '.mappings | keys | .[]' "$CONFIG_FILE")
 
 if [ "$VERBOSE" = true ]; then
     echo "Mappings found:"
-    echo "$MAPPINGS"
+    printf '%s\n' "${MAPPINGS_KEYS[@]}"
 fi
 
-# Iterate over each mapping
-echo "$MAPPINGS" | yq e 'keys | .[]' - | while read -r key; do
+# Declare associative arrays to keep track of mapping sources and targets
+declare -A mapping_sources
+declare -A mapping_targets
+
+# Parse mappings and deploy
+for key in "${MAPPINGS_KEYS[@]}"; do
     # Extract target path
     target=$(yq e ".mappings.\"$key\".target" "$CONFIG_FILE")
     # Define source path relative to dotfiles
     source="$HOME/dotfiles/$key"
 
+    # Expand environment variables in target path
+    eval target="$target"
+
+    # Convert source and target to absolute paths
+    source="$(realpath "$source")"
+    target="$(realpath -m "$target")"
+
+    # Store mapping
+    mapping_sources["$key"]="$source"
+    mapping_targets["$key"]="$target"
+
     # Deploy the file or directory
     deploy "$source" "$target"
 done
+
+# Perform cleanup of obsolete target files
+cleanup_obsolete_targets
+
+# Update manifest file
+if [ "$DRY_RUN" = false ]; then
+    # Clear manifest file
+    > "$MANIFEST_FILE"
+    # Write updated manifest
+    for path in "${!manifest[@]}"; do
+        echo "$path" >> "$MANIFEST_FILE"
+    done
+fi
 
 echo "Dotfiles deployment completed."
 
