@@ -9,7 +9,7 @@ BATTERY_STATUS_PATH="/sys/class/power_supply/BAT1/status"
 PING_TARGET="google.com"
 PING_COUNT=1
 WIFI_INTERFACE="wlp4s0"  # Replace with your actual Wi-Fi interface name
-UPDATE_INTERVAL=5  # Update interval in seconds
+UPDATE_INTERVAL=1  # Update interval in seconds
 MIN_WIDTH=100
 
 # Function to get Battery Status
