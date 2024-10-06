@@ -3,7 +3,7 @@
 # defines where which dotfile goes
 
 # Mapping format:
-# source: relative path inside .dotfiles
+# source: relative path inside dotfiles
 # target: absolute path where the file/directory should be copied
 
 mappings:

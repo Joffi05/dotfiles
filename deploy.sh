@@ -186,25 +186,52 @@ cleanup_obsolete_targets() {
             mapping_source="${mapping_sources[$key]}"
             mapping_target="${mapping_targets[$key]}"
 
-            if [[ "$target_file" == "$mapping_target" || "$target_file" == "$mapping_target/"* ]]; then
-                rel_path="${target_file#$mapping_target/}"
-                source_file="$mapping_source/$rel_path"
-
-                if [ ! -e "$source_file" ]; then
-                    if [ -e "$target_file" ]; then
-                        if [ "$DRY_RUN" = true ]; then
-                            log "Would remove obsolete target file: $target_file"
-                        else
-                            log "Removing obsolete target file: $target_file"
-                            rm -rf "$target_file"
-                        fi
+            if [ -d "$mapping_source" ]; then
+                # mapping_source is a directory
+                if [[ "$target_file" == "$mapping_target" || "$target_file" == "$mapping_target/"* ]]; then
+                    # Compute relative path
+                    if [ "$target_file" == "$mapping_target" ]; then
+                        rel_path=""
+                    else
+                        rel_path="${target_file#$mapping_target/}"
                     fi
-                    # Remove from manifest
-                    unset "manifest[$target_file]"
-                    log "Removed from manifest: $target_file"
+                    source_file="$mapping_source/$rel_path"
+                    if [ ! -e "$source_file" ]; then
+                        if [ -e "$target_file" ]; then
+                            if [ "$DRY_RUN" = true ]; then
+                                log "Would remove obsolete target file: $target_file"
+                            else
+                                log "Removing obsolete target file: $target_file"
+                                rm -rf "$target_file"
+                            fi
+                        fi
+                        # Remove from manifest
+                        unset "manifest[$target_file]"
+                        log "Removed from manifest: $target_file"
+                    fi
+                    matched=true
+                    break
                 fi
-                matched=true
-                break
+            else
+                # mapping_source is a file
+                if [ "$target_file" == "$mapping_target" ]; then
+                    source_file="$mapping_source"
+                    if [ ! -e "$source_file" ]; then
+                        if [ -e "$target_file" ]; then
+                            if [ "$DRY_RUN" = true ]; then
+                                log "Would remove obsolete target file: $target_file"
+                            else
+                                log "Removing obsolete target file: $target_file"
+                                rm -rf "$target_file"
+                            fi
+                        fi
+                        # Remove from manifest
+                        unset "manifest[$target_file]"
+                        log "Removed from manifest: $target_file"
+                    fi
+                    matched=true
+                    break
+                fi
             fi
         done
 

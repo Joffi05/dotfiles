@@ -1,10 +1,14 @@
+/home/joffi/.bash_profile
 /home/joffi/.config/nvim/lua/plugins/harpoon.lua
+/home/joffi/.config/nvim/lua/plugins/treesitter.lua
 /home/joffi/.config/ranger/rifle.conf
 /home/joffi/.config/ranger/plugins/ranger_devicons/CONTRIBUTING.MD
 /home/joffi/.config/nvim/lua/plugins/telescope.lua
+/home/joffi/.config/nvim/lua/config/lsp.lua
 /home/joffi/.config/ranger/rc.conf
 /home/joffi/.config/ranger/commands_full.py
 /home/joffi/.config/ranger/plugins/ranger_devicons/LICENSE_NERDFONT
+/home/joffi/.config/nvim/lua/plugins/lsp.lua
 /home/joffi/.config/nvim/lua/plugins/theme.lua
 /home/joffi/.config/sway/config
 /home/joffi/.config/git/.gitconfig
@@ -13,6 +17,7 @@
 /home/joffi/.config/ranger/plugins/ranger_devicons/__init__.py
 /home/joffi/.config/ranger/plugins/ranger_devicons/devicons.py
 /home/joffi/.config/ranger/plugins/ranger_devicons/LICENSE
+/home/joffi/.config/nvim/lua/config/treesitter.lua
 /home/joffi/.config/nvim/lua/plugins/ranger.lua
 /home/joffi/.config/ranger/commands.py
 /home/joffi/.config/sway/swaybar_status.sh
@@ -20,8 +25,8 @@
 /home/joffi/.config/alacritty/alacritty.toml
 /home/joffi/.config/nvim/lua/config/harpoon.lua
 /home/joffi/.config/ranger/plugins/ranger_devicons/screenshot.png
-/home/joffi/.config/ranger/plugins/ranger_devicons/README.md
 /home/joffi/.config/nvim/lua/config/ranger.lua
-/home/joffi/.config/nvim/TODO
+/home/joffi/.config/ranger/plugins/ranger_devicons/README.md
+/home/joffi/.bashrc
 /home/joffi/.config/nvim/lua/config/lazy.lua
 /home/joffi/.config/nvim/lua/config/theme.lua
