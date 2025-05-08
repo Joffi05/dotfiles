@@ -3,6 +3,7 @@
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
+
 # Path changes
 export PATH="$HOME/.local/bin:$PATH"
 

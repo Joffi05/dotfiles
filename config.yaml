@@ -13,6 +13,9 @@ mappings:
   bash/.bash_profile:
     target: "$HOME/.bash_profile"
 
+  bash/.profile:
+    target: "$HOME/.profile"
+
   alacritty/:
     target: "$XDG_CONFIG_HOME/alacritty/"
 
@@ -27,3 +30,9 @@ mappings:
 
   ranger/:
     target: "$XDG_CONFIG_HOME/ranger/"
+
+  latex/:
+    target: "$HOME/texmf/tex/latex/local"
+
+  nushell/:
+    target: "$XDG_CONFIG_HOME/nushell/"

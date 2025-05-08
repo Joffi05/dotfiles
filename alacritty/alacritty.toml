@@ -24,3 +24,7 @@ style = "Regular"
 [font.offset]
 x = 0
 y = 0
+
+[terminal.shell]
+program = "/usr/bin/nu"
+

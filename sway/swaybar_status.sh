@@ -9,7 +9,7 @@ BATTERY_STATUS_PATH="/sys/class/power_supply/BAT1/status"
 PING_TARGET="google.com"
 PING_COUNT=1
 WIFI_INTERFACE="wlp4s0"  # Replace with your actual Wi-Fi interface name
-UPDATE_INTERVAL=1  # Update interval in seconds
+UPDATE_INTERVAL=0.5  # Update interval in seconds
 MIN_WIDTH=100
 
 # Function to get Battery Status
@@ -100,10 +100,10 @@ get_wifi() {
             color="#00FF00"  # Green
         fi
 
-        echo "{\"name\": \"wifi\", \"full_text\": \"📶 $ssid ($signal_percent%)\", \"color\": \"$color\", \"min_width\": \"$MIN_WIDTH\"}"
+        echo "{\"name\": \"wifi\", \"full_text\": \"󰖩  $ssid ($signal_percent%)\", \"color\": \"$color\", \"min_width\": \"$MIN_WIDTH\"}"
 
     else
-        echo "{\"name\": \"wifi\", \"full_text\": \"📶 Disconnected\", \"color\": \"#FF0000\", \"min_width\": \"$MIN_WIDTH\"}"
+        echo "{\"name\": \"wifi\", \"full_text\": \"󰖪  Disconnected\", \"color\": \"#FF0000\", \"min_width\": \"$MIN_WIDTH\"}"
 
     fi
 }
@@ -113,10 +113,10 @@ get_ping() {
     ping_output=$(ping -c "$PING_COUNT" "$PING_TARGET" 2>/dev/null)
     if echo "$ping_output" | grep -q 'time='; then
         ping_time=$(echo "$ping_output" | grep 'time=' | awk -F'time=' '{print $2}' | awk '{print $1}')
-        echo "{\"name\": \"ping\", \"full_text\": \"📡 $ping_time ms\", \"color\": \"#00FFFF\", \"min_width\": \"$MIN_WIDTH\"}"
+        echo "{\"name\": \"ping\", \"full_text\": \" $ping_time ms\", \"color\": \"#00FFFF\", \"min_width\": \"$MIN_WIDTH\"}"
 
     else
-        echo "{\"name\": \"ping\", \"full_text\": \"📡 N/A\", \"color\": \"#FF0000\", \"min_width\": \"$MIN_WIDTH\"}"
+        echo "{\"name\": \"ping\", \"full_text\": \" N/A\", \"color\": \"#FF0000\", \"min_width\": \"$MIN_WIDTH\"}"
 
     fi
 }
@@ -129,7 +129,7 @@ get_cpu() {
     cpu_idle=$(echo "$cpu_idle" | tr ',' '.')
     # Calculate CPU usage
     cpu_usage=$(awk "BEGIN {printf \"%.1f\", 100 - $cpu_idle}")
-    echo "{\"name\": \"cpu\", \"full_text\": \"🖥️ CPU: $cpu_usage%\", \"color\": \"#FFD700\", \"min_width\": \"$MIN_WIDTH\"}"
+    echo "{\"name\": \"cpu\", \"full_text\": \" CPU: $cpu_usage%\", \"color\": \"#FFD700\", \"min_width\": \"$MIN_WIDTH\"}"
 
 }
 
@@ -140,7 +140,7 @@ get_ram() {
     ram_used_kb=$((ram_total_kb - ram_available_kb))
     ram_total_mb=$(awk "BEGIN {printf \"%.0f\", $ram_total_kb / 1024}")
     ram_used_mb=$(awk "BEGIN {printf \"%.0f\", $ram_used_kb / 1024}")
-    echo "{\"name\": \"ram\", \"full_text\": \"🧠 RAM: ${ram_used_mb}MB/${ram_total_mb}MB\", \"color\": \"#00CED1\", \"min_width\": \"$MIN_WIDTH\"}"
+    echo "{\"name\": \"ram\", \"full_text\": \"RAM: ${ram_used_mb}MB/${ram_total_mb}MB\", \"color\": \"#00CED1\", \"min_width\": \"$MIN_WIDTH\"}"
 
 }
 
